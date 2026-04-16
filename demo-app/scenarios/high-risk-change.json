@@ -1,0 +1,15 @@
+{
+  "name": "high-risk-change",
+  "expectedRisk": "high",
+  "change": {
+    "filesChanged": 14,
+    "linesAdded": 720,
+    "linesDeleted": 260,
+    "coveragePercent": 57,
+    "complexityScore": 9,
+    "previousDefects": 4,
+    "serviceCriticality": "high",
+    "hasDatabaseChange": true,
+    "hasSecurityChange": true
+  }
+}

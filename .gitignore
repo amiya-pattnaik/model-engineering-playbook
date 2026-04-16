@@ -1,0 +1,9 @@
+node_modules/
+.env
+.DS_Store
+demo-app/models/risk-model.json
+demo-app/.git-backup/
+demo-app/reports/*.json
+demo-app/reports/*.md
+!demo-app/reports/README.md
+ai-based-engineering-playbook.code-workspace

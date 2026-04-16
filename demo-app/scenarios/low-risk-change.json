@@ -1,0 +1,15 @@
+{
+  "name": "low-risk-change",
+  "expectedRisk": "low",
+  "change": {
+    "filesChanged": 2,
+    "linesAdded": 55,
+    "linesDeleted": 12,
+    "coveragePercent": 91,
+    "complexityScore": 2,
+    "previousDefects": 0,
+    "serviceCriticality": "low",
+    "hasDatabaseChange": false,
+    "hasSecurityChange": false
+  }
+}

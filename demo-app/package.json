@@ -1,0 +1,19 @@
+{
+  "name": "model-engineering-demo-app",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node src/server.js",
+    "start": "NODE_ENV=production node src/server.js",
+    "train": "node scripts/train-model.js",
+    "lint": "node --check src/server.js src/routes/predict.js src/routes/train.js src/routes/scenarios.js src/services/feature-engineering.js src/services/trainer.js src/services/predictor.js src/services/evaluator.js src/services/model-store.js scripts/train-model.js scripts/run-scenarios.js",
+    "demo:scenario": "node scripts/run-scenarios.js scenarios/high-risk-change.json",
+    "demo:scenarios": "node scripts/run-scenarios.js"
+  },
+  "dependencies": {
+    "cors": "^2.8.5",
+    "express": "^4.19.2",
+    "morgan": "^1.10.0"
+  }
+}

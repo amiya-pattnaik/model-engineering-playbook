@@ -1,0 +1,15 @@
+{
+  "name": "medium-risk-change",
+  "expectedRisk": "medium",
+  "change": {
+    "filesChanged": 7,
+    "linesAdded": 280,
+    "linesDeleted": 95,
+    "coveragePercent": 74,
+    "complexityScore": 6,
+    "previousDefects": 1,
+    "serviceCriticality": "medium",
+    "hasDatabaseChange": true,
+    "hasSecurityChange": false
+  }
+}

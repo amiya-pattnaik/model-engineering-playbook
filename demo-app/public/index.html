@@ -1,0 +1,176 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Model Engineering Demo - Change Risk Predictor</title>
+  <style>
+    :root { font-family: Arial, sans-serif; background: #101418; color: #f4f7fb; }
+    body { margin: 0; padding: 28px; max-width: 1040px; margin-inline: auto; }
+    h1 { margin-top: 0; }
+    .panel { border: 1px solid #2c3642; border-radius: 8px; padding: 20px; background: #171d24; }
+    .grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+    label { display: block; font-weight: 700; margin-bottom: 6px; }
+    input, select { width: 100%; box-sizing: border-box; border-radius: 8px; border: 1px solid #3a4654; background: #101418; color: #f4f7fb; padding: 10px; }
+    button { border: 0; border-radius: 8px; padding: 12px 16px; margin-top: 14px; background: #58d68d; color: #101418; font-weight: 800; cursor: pointer; }
+    button.secondary { background: #8ab4f8; margin-left: 8px; }
+    pre { background: #0b0f13; border: 1px solid #2c3642; border-radius: 8px; padding: 14px; white-space: pre-wrap; word-break: break-word; }
+    .status { margin: 12px 0; color: #c9d4e2; }
+    .risk { display: inline-block; padding: 4px 10px; border-radius: 8px; background: #2c3642; margin-left: 8px; font-size: 13px; }
+    @media (max-width: 760px) { .grid { grid-template-columns: 1fr; } body { padding: 16px; } }
+  </style>
+</head>
+<body>
+  <main class="panel">
+    <h1>Change Risk Predictor <span class="risk" id="risk-pill">model demo</span></h1>
+    <p>Train a small local model, load a scenario, and predict release risk from software change metadata.</p>
+
+    <label for="scenario-select">Load scenario</label>
+    <select id="scenario-select">
+      <option value="">Manual entry</option>
+    </select>
+
+    <div class="grid" style="margin-top: 16px;">
+      <div>
+        <label for="filesChanged">Files changed</label>
+        <input id="filesChanged" type="number" value="8">
+      </div>
+      <div>
+        <label for="linesAdded">Lines added</label>
+        <input id="linesAdded" type="number" value="320">
+      </div>
+      <div>
+        <label for="linesDeleted">Lines deleted</label>
+        <input id="linesDeleted" type="number" value="100">
+      </div>
+      <div>
+        <label for="coveragePercent">Coverage %</label>
+        <input id="coveragePercent" type="number" value="72">
+      </div>
+      <div>
+        <label for="complexityScore">Complexity score</label>
+        <input id="complexityScore" type="number" value="6">
+      </div>
+      <div>
+        <label for="previousDefects">Previous defects</label>
+        <input id="previousDefects" type="number" value="2">
+      </div>
+      <div>
+        <label for="serviceCriticality">Service criticality</label>
+        <select id="serviceCriticality">
+          <option value="low">low</option>
+          <option value="medium" selected>medium</option>
+          <option value="high">high</option>
+        </select>
+      </div>
+      <div>
+        <label for="hasDatabaseChange">Database change</label>
+        <select id="hasDatabaseChange">
+          <option value="false">false</option>
+          <option value="true" selected>true</option>
+        </select>
+      </div>
+      <div>
+        <label for="hasSecurityChange">Security change</label>
+        <select id="hasSecurityChange">
+          <option value="false" selected>false</option>
+          <option value="true">true</option>
+        </select>
+      </div>
+    </div>
+
+    <button id="predict">Predict risk</button>
+    <button id="train" class="secondary">Train model</button>
+    <div class="status" id="status">Waiting for input...</div>
+
+    <h3>Result</h3>
+    <pre id="result">No prediction yet.</pre>
+  </main>
+
+  <script>
+    const scenarioSelect = document.getElementById('scenario-select');
+    const statusEl = document.getElementById('status');
+    const resultEl = document.getElementById('result');
+    const riskPill = document.getElementById('risk-pill');
+
+    function getChange() {
+      return {
+        filesChanged: Number(document.getElementById('filesChanged').value),
+        linesAdded: Number(document.getElementById('linesAdded').value),
+        linesDeleted: Number(document.getElementById('linesDeleted').value),
+        coveragePercent: Number(document.getElementById('coveragePercent').value),
+        complexityScore: Number(document.getElementById('complexityScore').value),
+        previousDefects: Number(document.getElementById('previousDefects').value),
+        serviceCriticality: document.getElementById('serviceCriticality').value,
+        hasDatabaseChange: document.getElementById('hasDatabaseChange').value === 'true',
+        hasSecurityChange: document.getElementById('hasSecurityChange').value === 'true'
+      };
+    }
+
+    function setChange(change) {
+      Object.entries(change).forEach(([key, value]) => {
+        const el = document.getElementById(key);
+        if (el) el.value = String(value);
+      });
+    }
+
+    async function loadScenarios() {
+      const res = await fetch('/api/scenarios');
+      if (!res.ok) return;
+      const data = await res.json();
+
+      data.scenarios.forEach((scenario) => {
+        const option = document.createElement('option');
+        option.value = scenario.name;
+        option.textContent = `${scenario.name} (${scenario.expectedRisk})`;
+        option.dataset.change = JSON.stringify(scenario.change);
+        scenarioSelect.appendChild(option);
+      });
+    }
+
+    scenarioSelect.addEventListener('change', (event) => {
+      const option = event.target.selectedOptions[0];
+      if (option?.dataset.change) setChange(JSON.parse(option.dataset.change));
+    });
+
+    async function predict() {
+      statusEl.textContent = 'Predicting...';
+      resultEl.textContent = '';
+
+      try {
+        const res = await fetch('/api/predict', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(getChange())
+        });
+        const data = await res.json();
+
+        if (!res.ok) {
+          statusEl.textContent = data.detail || 'Prediction failed';
+          resultEl.textContent = JSON.stringify(data, null, 2);
+          return;
+        }
+
+        riskPill.textContent = `risk: ${data.prediction.risk}`;
+        statusEl.textContent = `${data.prediction.risk} risk with ${data.prediction.confidence} confidence in ${data.latency_ms} ms`;
+        resultEl.textContent = JSON.stringify(data.prediction, null, 2);
+      } catch (err) {
+        statusEl.textContent = 'Network error';
+        resultEl.textContent = err.message;
+      }
+    }
+
+    async function train() {
+      statusEl.textContent = 'Training...';
+      const res = await fetch('/api/train', { method: 'POST' });
+      const data = await res.json();
+      statusEl.textContent = res.ok ? `trained model; accuracy ${data.evaluation.accuracy}` : 'Training failed';
+      resultEl.textContent = JSON.stringify(data, null, 2);
+    }
+
+    document.getElementById('predict').addEventListener('click', predict);
+    document.getElementById('train').addEventListener('click', train);
+    loadScenarios();
+  </script>
+</body>
+</html>
