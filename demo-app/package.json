@@ -7,13 +7,18 @@
     "dev": "node src/server.js",
     "start": "NODE_ENV=production node src/server.js",
     "train": "node scripts/train-model.js",
-    "lint": "node --check src/server.js src/routes/predict.js src/routes/train.js src/routes/scenarios.js src/services/feature-engineering.js src/services/trainer.js src/services/predictor.js src/services/evaluator.js src/services/model-store.js scripts/train-model.js scripts/run-scenarios.js",
+    "lint": "node --check src/server.js src/routes/predict.js src/routes/train.js src/routes/scenarios.js src/services/feature-engineering.js src/services/trainer.js src/services/trainer-cart.js src/services/predictor.js src/services/predictor-cart.js src/services/evaluator.js src/services/model-store.js scripts/train-model.js scripts/run-scenarios.js",
+    "train:v2": "node scripts/train-model.js --engine=cart",
     "demo:scenario": "node scripts/run-scenarios.js scenarios/high-risk-change.json",
-    "demo:scenarios": "node scripts/run-scenarios.js"
+    "demo:scenarios": "node scripts/run-scenarios.js",
+    "demo:scenario:v2": "node scripts/run-scenarios.js --engine=cart scenarios/high-risk-change.json",
+    "demo:scenarios:v2": "node scripts/run-scenarios.js --engine=cart"
   },
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.19.2",
+    "ml-cart": "^2.1.1",
+    "ml-cart": "^3.1.1",
     "morgan": "^1.10.0"
   }
 }

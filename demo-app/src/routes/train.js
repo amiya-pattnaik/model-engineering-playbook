@@ -6,12 +6,14 @@ const router = express.Router();
 router.post('/', (req, res) => {
   try {
     const start = Date.now();
-    const result = trainAndSaveModel();
+    const engine = req.query.engine === 'cart' || req.body?.engine === 'cart' ? 'cart' : 'manual';
+    const result = trainAndSaveModel(engine);
 
     res.json({
       runId: `train_${start}`,
+      engine,
       latency_ms: Date.now() - start,
-      modelPath: getModelPath(),
+      modelPath: getModelPath(engine),
       model: result.model,
       evaluation: result.evaluation
     });

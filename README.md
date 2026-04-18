@@ -4,11 +4,16 @@ Small, runnable repository that demonstrates a practical model engineering workf
 
 This playbook builds a simple **software change risk prediction model**. Given change metadata such as files changed, lines added, coverage, complexity, and previous defects, the app predicts whether the change is `low`, `medium`, or `high` risk.
 
+This repo supports two model paths:
+- `manual`: a simple centroid classifier that shows the fundamentals clearly.
+- `ml-cart v2`: a framework-backed decision tree classifier using `ml-cart`.
+
 ## What You Get
 
 - `docs/playbook.md` with the model engineering workflow.
 - `demo-app/` with a web UI, training endpoint, prediction endpoint, scenarios, and reports.
-- A small interpretable model that can be trained locally without external services.
+- A small interpretable manual model that can be trained locally without external services.
+- A framework-backed v2 model using `ml-cart` for comparison.
 - Scenario runner for repeatable demo/evaluation runs.
 
 ## Concept Primer: What Is Model Engineering?
@@ -54,6 +59,25 @@ npm run dev
 5. Model artifact is saved to `demo-app/models/risk-model.json`.
 6. UI/API sends a change payload to `POST /api/predict`.
 7. Predictor returns risk, confidence, contributing factors, and model metadata.
+
+## Manual vs ml-cart v2
+
+The manual path is the baseline implementation:
+
+```text
+training examples -> feature vectors -> low/medium/high centroids -> nearest centroid prediction
+```
+
+The `ml-cart v2` path keeps the same input fields and API shape, but replaces the centroid classifier with a decision tree from `ml-cart`:
+
+```text
+training examples -> feature vectors -> decision tree -> class prediction
+```
+
+This mirrors the pattern used in the other AI playbooks:
+
+- manual implementation first, to show fundamentals
+- framework-backed v2 second, to show how the same workflow maps to a known library
 
 ## Simple Mental Model
 
@@ -166,16 +190,9 @@ npm run lint
 - Replace the simple centroid classifier with logistic regression, decision trees, or TensorFlow.js.
 - Add monitoring for prediction drift, confidence distribution, and post-release defect correlation.
 
-## Roadmap: Framework-Backed v2
+Framework-backed v2 is available on the `feature/ml-cart-v2` branch. It uses `ml-cart` for a lightweight decision tree classifier while keeping the same training, prediction, scenario, and UI flow.
 
-This repo starts with a manual/fundamentals implementation so the model engineering lifecycle is easy to understand.
-
-A future `v2` branch can add a framework-backed implementation using a standard ML library such as:
-
-- `ml-cart` for a lightweight decision tree classifier.
-- `@tensorflow/tfjs-node` for a TensorFlow.js-based model.
-
-The goal of v2 will be to keep the same problem and API shape, while showing how the same workflow maps to a recognized ML framework.
+TensorFlow.js can still be added later as another branch if a neural-network style model is useful for comparison.
 
 ## Limitations
 

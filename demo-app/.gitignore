@@ -1,6 +1,6 @@
 node_modules/
 .env
-models/risk-model.json
+models/*.json
 reports/*.json
 reports/*.md
 !reports/README.md

@@ -8,12 +8,17 @@ training data -> feature engineering -> train model -> evaluate -> serve predict
 
 This demo predicts software change risk as `low`, `medium`, or `high` based on fields such as files changed, lines added/deleted, test coverage, complexity, previous defects, service criticality, database changes, and security changes.
 
+The app supports two model engines:
+- `manual`: a centroid classifier that shows the model mechanics directly.
+- `cart`: an `ml-cart` decision tree classifier for a framework-backed v2 path.
+
 ## Run Locally
 
 ```bash
 cd demo-app
 npm install
 npm run train
+npm run train:v2
 npm run dev
 # open http://localhost:3000
 ```
@@ -21,7 +26,9 @@ npm run dev
 ## What the App Does
 
 - Trains a simple centroid classifier from `data/training-data.json`.
+- Trains an `ml-cart` decision tree classifier for v2 comparison.
 - Saves a model artifact to `models/risk-model.json`.
+- Saves the v2 model artifact to `models/risk-model-cart.json`.
 - Serves predictions through `POST /api/predict`.
 - Exposes `POST /api/train` to retrain from the browser.
 - Loads reusable demo scenarios from `scenarios/*.json`.
@@ -61,8 +68,9 @@ Startup sequence:
    - `POST /api/train`
    - `GET /api/scenarios`
 3. Static UI is served from `public/index.html`.
-4. The model is trained from `data/training-data.json`.
-5. The model artifact is saved to `models/risk-model.json`.
+4. The manual model is trained from `data/training-data.json`.
+5. The `ml-cart v2` model is trained from the same data.
+6. Model artifacts are saved to `models/risk-model.json` and `models/risk-model-cart.json`.
 
 So every server restart refreshes the demo model from the sample training data.
 
@@ -104,6 +112,14 @@ average low-risk example     -> low centroid
 average medium-risk example  -> medium centroid
 average high-risk example    -> high centroid
 ```
+
+The `cart` engine uses a decision tree instead:
+
+```text
+training examples -> feature vectors -> ml-cart decision tree -> low/medium/high prediction
+```
+
+Both engines use the same raw data and feature engineering layer.
 
 ## Feature Engineering Flow
 
@@ -246,6 +262,13 @@ Run all scenarios:
 npm run demo:scenarios
 ```
 
+Run the `ml-cart v2` scenario path:
+
+```bash
+npm run demo:scenario:v2
+npm run demo:scenarios:v2
+```
+
 Reports are written to `reports/` as JSON and Markdown.
 
 The scenario runner is useful for repeatable demos and lightweight model checks.
@@ -255,8 +278,10 @@ The scenario runner is useful for repeatable demos and lightweight model checks.
 - `src/server.js`: Express server and startup training.
 - `src/services/feature-engineering.js`: validates and normalizes raw change data.
 - `src/services/trainer.js`: trains class centroids from labeled records.
+- `src/services/trainer-cart.js`: trains the `ml-cart` decision tree model.
 - `src/services/evaluator.js`: computes accuracy and confusion matrix.
 - `src/services/predictor.js`: predicts risk and returns reasons.
+- `src/services/predictor-cart.js`: predicts risk through the `ml-cart` model.
 - `src/services/model-store.js`: loads/saves model artifacts.
 - `src/routes/predict.js`: prediction API.
 - `src/routes/train.js`: training API.
@@ -269,6 +294,9 @@ The scenario runner is useful for repeatable demos and lightweight model checks.
 # train and save model
 npm run train
 
+# train and save ml-cart v2 model
+npm run train:v2
+
 # run API + UI
 npm run dev
 
@@ -277,6 +305,9 @@ npm run demo:scenario
 
 # run all scenarios
 npm run demo:scenarios
+
+# run ml-cart v2 scenarios
+npm run demo:scenarios:v2
 
 # syntax check
 npm run lint

@@ -1,7 +1,7 @@
 node_modules/
 .env
 .DS_Store
-demo-app/models/risk-model.json
+demo-app/models/*.json
 demo-app/.git-backup/
 demo-app/reports/*.json
 demo-app/reports/*.md

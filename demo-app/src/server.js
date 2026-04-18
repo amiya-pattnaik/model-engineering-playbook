@@ -26,7 +26,9 @@ const publicDir = path.join(__dirname, '../public');
 app.use(express.static(publicDir));
 
 app.listen(port, () => {
-  const result = trainAndSaveModel();
+  const result = trainAndSaveModel('manual');
+  const cartResult = trainAndSaveModel('cart');
   console.log(`Demo app listening on http://localhost:${port}`);
   console.log(`Model trained with ${result.model.trainingRecords} records. Accuracy: ${result.evaluation.accuracy}`);
+  console.log(`CART v2 model trained with ${cartResult.model.trainingRecords} records. Accuracy: ${cartResult.evaluation.accuracy}`);
 });

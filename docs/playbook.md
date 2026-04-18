@@ -74,6 +74,36 @@ Why this model:
 - deterministic
 - interpretable enough for a PoC
 
+## Framework-Backed v2
+
+The `feature/ml-cart-v2` branch adds a parallel implementation using `ml-cart`.
+
+The v2 path keeps the same:
+
+- input data contract
+- feature engineering
+- training endpoint
+- prediction endpoint
+- scenario runner
+- browser workflow
+
+The model implementation changes from:
+
+```text
+manual centroid classifier
+```
+
+to:
+
+```text
+ml-cart decision tree classifier
+```
+
+This makes the comparison clear:
+
+- manual path: best for explaining fundamentals
+- `ml-cart v2`: best for showing framework-backed model training in JavaScript
+
 ## Prediction Explanation
 
 The prediction includes contributing factors such as:

@@ -30,6 +30,12 @@
       <option value="">Manual entry</option>
     </select>
 
+    <label for="engine-select" style="margin-top: 14px;">Model engine</label>
+    <select id="engine-select">
+      <option value="manual">manual centroid model</option>
+      <option value="cart">ml-cart v2 decision tree</option>
+    </select>
+
     <div class="grid" style="margin-top: 16px;">
       <div>
         <label for="filesChanged">Files changed</label>
@@ -92,6 +98,7 @@
     const statusEl = document.getElementById('status');
     const resultEl = document.getElementById('result');
     const riskPill = document.getElementById('risk-pill');
+    const engineSelect = document.getElementById('engine-select');
 
     function getChange() {
       return {
@@ -141,7 +148,7 @@
         const res = await fetch('/api/predict', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(getChange())
+          body: JSON.stringify({ ...getChange(), engine: engineSelect.value })
         });
         const data = await res.json();
 
@@ -152,7 +159,7 @@
         }
 
         riskPill.textContent = `risk: ${data.prediction.risk}`;
-        statusEl.textContent = `${data.prediction.risk} risk with ${data.prediction.confidence} confidence in ${data.latency_ms} ms`;
+        statusEl.textContent = `${data.engine} -> ${data.prediction.risk} risk with ${data.prediction.confidence} confidence in ${data.latency_ms} ms`;
         resultEl.textContent = JSON.stringify(data.prediction, null, 2);
       } catch (err) {
         statusEl.textContent = 'Network error';
@@ -162,9 +169,13 @@
 
     async function train() {
       statusEl.textContent = 'Training...';
-      const res = await fetch('/api/train', { method: 'POST' });
+      const res = await fetch('/api/train', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ engine: engineSelect.value })
+      });
       const data = await res.json();
-      statusEl.textContent = res.ok ? `trained model; accuracy ${data.evaluation.accuracy}` : 'Training failed';
+      statusEl.textContent = res.ok ? `trained ${data.engine} model; accuracy ${data.evaluation.accuracy}` : 'Training failed';
       resultEl.textContent = JSON.stringify(data, null, 2);
     }
 
